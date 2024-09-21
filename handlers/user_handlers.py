@@ -30,6 +30,7 @@ async def process_user_blocked_bot(event: ChatMemberUpdated):
 @router.message(CommandStart())
 async def process_start_command(message: Message):
     await message.answer(text=LEXICON_RU['/start'])
+    
 
 
 @router.message(Command(commands='help'))
