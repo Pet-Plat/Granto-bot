@@ -47,7 +47,7 @@ async def grant_experience(message: Message):
     if message.text in ['Да', 'да']:
         user.grant_experience = 'Да'
         user.next_action = 'project_role'
-        logger.debug('yes ansver')
+        logger.debug('yes answer')
 
     else:
         user.grant_experience = 'Нет'
