@@ -17,8 +17,6 @@ from aiogram.types import (
 )
 
 TOKEN = getenv("BOT_TOKEN")
-TOKEN = '7208983200:AAEIitzM6OixWczaeXpAYRgjfEzVmZvoOA4'
-
 
 
 BUTTON_CANCEL = KeyboardButton(text="❌ Cancel")
