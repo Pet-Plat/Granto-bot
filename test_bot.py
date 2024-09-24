@@ -67,7 +67,18 @@ class GrantExperience(CancellableScene, state='GrantExperience'):
 
 class UserInitials(CancellableScene, state='initials'):
     # @on.message.enter()
-    @on.message
+    @on.message.enter()
+    async def get_initials(message: Message):
+        logger.debug("i'm in get_initials")
+        await message.answer(
+            text=LEXICON_RU['initials'],
+            reply_markup=ReplyKeyboardRemove()
+        )
+        initials = message.text
+        logger.debug(initials)
+
+    
+    @on.message(F.text == 'asd')
     async def get_initials(message: Message):
         logger.debug("i'm in get_initials")
         await message.answer(
@@ -92,8 +103,8 @@ class PersonalLicense(
     async def demo_callback(self, callback_query: CallbackQuery):
         logger.debug("i'm in demo_callback")
         await callback_query.message.answer(text=LEXICON_RU['initials'])
-        await callback_query.answer(cache_time=0, reply_markup=ReplyKeyboardRemove())
-        await callback_query.message.delete_reply_markup()
+        # await callback_query.answer(cache_time=0, reply_markup=ReplyKeyboardRemove())
+        # await callback_query.message.delete_reply_markup()
 
     @on.message(CommandStart())
     async def start(self, message: Message):
@@ -136,22 +147,6 @@ async def main():
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
+
     
-
 asyncio.run(main())
-
-
-# def main() -> None:
-#     dp = create_dispatcher()
-#     config: Config = load_config()
-#     bot = Bot(token=config.tg_bot.token)
-
-#     logger.info('Бот был успешно запущен')
-
-#     dp.run_polling(bot)
-
-
-# if __name__ == "__main__":
-#     # Recommended to use CLI instead of this snippet.
-#     # `aiogram run polling scene_example:create_dispatcher --token BOT_TOKEN --log-level info`
-#     main()
