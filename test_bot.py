@@ -4,11 +4,9 @@ import sys
 import logging
 import asyncio
 
-from environs import Env
-from typing import TypedDict
 from config_data.config import load_config, Config
 
-from aiogram import Bot, Dispatcher, F, html
+from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.scene import After, Scene, SceneRegistry, on
 from aiogram.types import (

@@ -2,7 +2,7 @@ import logging
 import sys 
 
 from aiogram import Router
-from aiogram.types import Message, ChatMemberUpdated
+from aiogram.types import Message, ChatMemberUpdated, InlineKeyboardButton, InlineKeyboardMarkup
 from lexicon.lexicon import LEXICON_RU
 from aiogram.filters import Command, CommandStart, ChatMemberUpdatedFilter, KICKED
 
@@ -29,8 +29,11 @@ async def process_user_blocked_bot(event: ChatMemberUpdated):
 
 @router.message(CommandStart())
 async def process_start_command(message: Message):
-    await message.answer(text=LEXICON_RU['/start'])
-    
+    await message.answer(text=LEXICON_RU['/start'],
+                         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                             [InlineKeyboardButton(text='Согласен', callback_data='start')],
+                             [InlineKeyboardButton(text='Ссылка', url='https://ya.ru')]]))
+    logger.info('I am out process_start_command')
 
 
 @router.message(Command(commands='help'))
