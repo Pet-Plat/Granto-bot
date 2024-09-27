@@ -7,7 +7,7 @@ import asyncio
 from config_data.config import load_config, Config
 
 from aiogram import Bot, Dispatcher, F
-from aiogram.filters import Command, CommandStart
+from aiogram.filters import CommandStart
 from aiogram.fsm.scene import After, Scene, SceneRegistry, on
 from aiogram.types import (
     CallbackQuery,
@@ -21,7 +21,6 @@ from aiogram.types import (
 
 from lexicon.lexicon import LEXICON_RU
 
-
 formatter = logging.Formatter(
     fmt='#%(levelname)-8s [%(asctime)s] - %(filename)s:'
         '%(lineno)d - %(name)s:%(funcName)s - %(message)s'
@@ -34,7 +33,6 @@ stdout_logger = logging.StreamHandler(sys.stdout)
 stdout_logger.setFormatter(formatter)
 logger.addHandler(stdout_logger)
 
-
 BUTTON_CANCEL = KeyboardButton(text="❌ Cancel")
 
 
@@ -43,10 +41,10 @@ class CancellableScene(Scene):
     This scene is used to handle cancel and back buttons,
     can be used as a base class for other scenes that needs to support cancel and back buttons.
     """
-
     @on.message(F.text.casefold() == BUTTON_CANCEL.text.casefold(), after=After.exit())
     async def handle_cancel(self, message: Message):
-        await message.answer("Для того, чтобы начать сначала введите команду /start", reply_markup=ReplyKeyboardRemove())
+        await message.answer("Для того, чтобы начать сначала введите команду /start",
+                             reply_markup=ReplyKeyboardRemove())
 
 
 class GrantExperience(CancellableScene, state='GrantExperience'):
@@ -54,7 +52,9 @@ class GrantExperience(CancellableScene, state='GrantExperience'):
     async def on_enter(self, message: Message):
         await message.answer(
             LEXICON_RU['GrantExperience'],
-            reply_markup=ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Да'), KeyboardButton(text='Нет'), BUTTON_CANCEL]], resize_keyboard=True),
+            reply_markup=ReplyKeyboardMarkup(
+                keyboard=[[KeyboardButton(text='Да'), KeyboardButton(text='Нет'), BUTTON_CANCEL]],
+                resize_keyboard=True),
         )
 
     @on.callback_query.enter()  # different types of updates that start the scene also supported.
@@ -66,7 +66,7 @@ class GrantExperience(CancellableScene, state='GrantExperience'):
 class UserInitials(CancellableScene, state='initials'):
     # @on.message.enter()
     @on.message.enter()
-    async def get_initials(message: Message):
+    async def get_initials(self, message: Message):
         logger.debug("i'm in get_initials")
         await message.answer(
             text=LEXICON_RU['initials'],
@@ -75,9 +75,8 @@ class UserInitials(CancellableScene, state='initials'):
         initials = message.text
         logger.debug(initials)
 
-    
     @on.message(F.text == 'asd')
-    async def get_initials(message: Message):
+    async def get_initials(self, message: Message):
         logger.debug("i'm in get_initials")
         await message.answer(
             text=LEXICON_RU['initials'],
@@ -88,7 +87,7 @@ class UserInitials(CancellableScene, state='initials'):
 
 
 class PersonalLicense(
-    Scene, 
+    Scene,
     reset_data_on_enter=True,
     callback_query_without_state=True,
 ):
@@ -112,7 +111,7 @@ class PersonalLicense(
                 inline_keyboard=[
                     [InlineKeyboardButton(text=LEXICON_RU["agree"], url='https://ya.ru')],
                     [InlineKeyboardButton(text='Даю согласие', callback_data="agree")]
-                    ]
+                ]
             ),
         )
 
@@ -135,9 +134,8 @@ def create_dispatcher() -> Dispatcher:
 
 
 async def main():
-
     config: Config = load_config()
-    
+
     bot = Bot(token=config.tg_bot.token)
     dp = create_dispatcher()
 
@@ -146,5 +144,5 @@ async def main():
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
-    
+
 asyncio.run(main())

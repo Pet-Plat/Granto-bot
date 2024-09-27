@@ -5,10 +5,11 @@ import sys
 from aiogram import Router, F
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
+from aiogram.fsm.scene import Scene, on, After, SceneRegistry
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, CallbackQuery
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
+import keyboards
 from lexicon.lexicon import LEXICON_RU
 
 formatter = logging.Formatter(
@@ -23,51 +24,11 @@ stdout_logger.setFormatter(formatter)
 logger.addHandler(stdout_logger)
 
 router = Router()
+registry = SceneRegistry(router)
 # router.message.filter(IsInList(message.from_user.id))
 
 
 user_dict: dict[int, dict[str, str | int | bool]] = {}
-
-# await message.answer(LEXICON_RU['GrantExperience'],
-#                      reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-#                          [InlineKeyboardButton(text='Да', callback_data='GrantExperience_yes')],
-#                          [InlineKeyboardButton(text='Нет', callback_data='GrantExperience_no')]]))
-
-keyboard_bool = ReplyKeyboardMarkup(keyboard=[
-    [KeyboardButton(text='Да')],
-    [KeyboardButton(text='Нет')]
-])
-
-keyboard_experience = ReplyKeyboardMarkup(keyboard=[
-    [KeyboardButton(text='Выигрывал больше двух раз'), KeyboardButton(text='Подавался, но не выигрывал')],
-    [KeyboardButton(text='Выигрывал один раз'), KeyboardButton(text='Нет')],
-])
-
-keyboard_role = ReplyKeyboardMarkup(keyboard=[
-    [KeyboardButton(text='Автор'), KeyboardButton(text='Участник'), KeyboardButton(text='Не помню')],
-])
-
-
-def keyboard_ground():
-    grant_ground_names = ['Фонд президентских грантов', 'Другое', 'Не помню', 'Президентский фонд культурных инициатив',
-                          'Росмолодёжь', 'Региональные программы поддержки некоммерческих организаций',
-                          'Субсидии и соц. контракты', 'Стартапы', 'Фонды и программы поддержки предпринимателей']
-    kb_builder: ReplyKeyboardBuilder = ReplyKeyboardBuilder()
-    buttons: list[KeyboardButton] = [
-        KeyboardButton(text=grant_ground_names[i]) for i in range(len(grant_ground_names))]
-    kb_builder.row(*buttons, width=3)
-    return kb_builder.as_markup(resize_keyboard=True)
-
-
-def keyboard_amount():
-    grant_amount_names = ['Не помню', 'Менее 300 000р', '300 000 - 1 000 000р', '1 000 000 - 3 000 000р',
-                          '3 000 000 - 10 000 000р', 'Более 10 000 000р']
-    kb_builder: ReplyKeyboardBuilder = ReplyKeyboardBuilder()
-    buttons: list[KeyboardButton] = [
-        KeyboardButton(text=grant_amount_names[i]) for i in range(len(grant_amount_names))
-    ]
-    kb_builder.row(*buttons, width=3)
-    return kb_builder.as_markup(resize_keyboard=True)
 
 
 class FSMFillForm(StatesGroup):
@@ -97,7 +58,7 @@ async def get_exp(message: Message, state: FSMContext):
         await state.update_data(name=message.text)
 
         await message.answer(LEXICON_RU['GrantExperience'],
-                             reply_markup=keyboard_experience)
+                             reply_markup=keyboards.keyboard_experience)
         await state.set_state(FSMFillForm.fill_leader)
 
 
@@ -116,7 +77,7 @@ async def get_leader(message: Message, state: FSMContext):
         await state.set_state(FSMFillForm.fill_opportunities)
     else:
         await message.answer('Были руководителем (автором проекта) или участником?',
-                             reply_markup=keyboard_role)
+                             reply_markup=keyboards.keyboard_role)
         await state.set_state(FSMFillForm.fill_ground)
 
 
@@ -125,7 +86,7 @@ async def get_ground(message: Message, state: FSMContext):
     logger.info(message.text)
     await state.update_data(name=message.text)
     await message.answer(text=LEXICON_RU['ground'],
-                         reply_markup=keyboard_ground())
+                         reply_markup=keyboards.keyboard_ground())
     await state.set_state(FSMFillForm.fill_amount)
 
 
@@ -149,7 +110,7 @@ async def get_amount(message: Message, state: FSMContext):
     else:
         await state.update_data(name=message.text)
         await message.answer(text=LEXICON_RU['grant_amount'],
-                             reply_markup=keyboard_amount())
+                             reply_markup=keyboards.keyboard_amount())
         await state.set_state(FSMFillForm.fill_opportunities)
 
 
@@ -166,3 +127,25 @@ async def get_opportunities(message: Message, state: FSMContext):
         await message.answer('Ответы записаны')
     else:
         await message.answer('Вы не ответили на вопросы')
+
+
+# class CancellableScene(Scene):
+#     """
+#     This scene is used to handle cancel and back buttons,
+#     can be used as a base class for other scenes that needs to support cancel and back buttons.
+#     """
+#     @on.message(F.text.casefold() == keyboards.BUTTON_CANCEL.text.casefold(), after=After.exit())
+#     async def handle_cancel(self, message: Message):
+#         await message.answer("Для того, чтобы начать сначала введите команду /start",
+#                              reply_markup=ReplyKeyboardRemove())
+#
+#
+# class ExperienceInObtainingGrants(CancellableScene, state='ExperienceInObtainingGrants'):
+#     pass
+#
+#
+# # All scenes at register time converts to Routers and includes into specified router.
+# registry.add(
+#     ExperienceInObtainingGrants,
+#
+# )
