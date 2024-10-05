@@ -2,7 +2,7 @@ import logging
 import sys 
 
 from aiogram import Router
-from aiogram.types import Message, ChatMemberUpdated, InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import Message, ChatMemberUpdated, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
 from lexicon.lexicon import LEXICON_RU
 from aiogram.filters import Command, CommandStart, ChatMemberUpdatedFilter, KICKED
 
@@ -45,5 +45,7 @@ async def process_help_command(message: Message):
 async def process_help_command(message: Message):
     await message.answer(text=LEXICON_RU['/reset'])
     # нужно удалить всю инфу из бд
+
+
 
 

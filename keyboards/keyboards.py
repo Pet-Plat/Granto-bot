@@ -37,6 +37,11 @@ keyboard_role = ReplyKeyboardMarkup(keyboard=[
     [KeyboardButton(text='Автор'), KeyboardButton(text='Участник'), KeyboardButton(text='Не помню')],
 ])
 
+keyboard_opportunities = ReplyKeyboardMarkup(keyboard=[
+    [KeyboardButton(text=LEXICON_RU['keyboard_opportunities_text'][i]) for i in range(3)],
+    [KeyboardButton(text=LEXICON_RU['keyboard_opportunities_text'][i]) for i in range(3, 6)]
+])
+
 BUTTON_CANCEL = KeyboardButton(text="❌ Cancel")
 
 
